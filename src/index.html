@@ -1,0 +1,66 @@
+<html>
+    <head>
+    </head>
+    <body>
+        <div id="vue-app">
+            <input v-model="city">
+            <button v-on:click="getWeatherData">Send Request</button>
+            <div v-if="Rain">Umbrella</div>
+            <div v-else>No Umbrella</div>
+            <div v-if="Mask">Mask</div>
+            <div v-else>No Mask</div>
+            
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Temperature</th>
+                    <th scope="col">Wind Speed</th>
+                    <th scope="col">Rainfall</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="weather in weatherInfo">
+                    <td><b>{{weather.time}}</b></td>
+                    <td>{{weather.temp}}</td>
+                    <td>{{weather.wind}}</td>
+                    <td>{{weather.rain}}</td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script >
+        var app = new Vue({
+            el: '#vue-app',
+            data: {
+                weatherInfo: [],
+                city: "Dublin,IE",
+                Rain: false,
+                Mask: false,
+            },
+            methods: {
+                getWeatherData: function () {
+                    
+                    fetch(`http://localhost:3000/weather-and-pollution/${this.city}`).then(
+                        function(response) {
+                            if (response.status !== 200) {
+                                console.warn('Looks like there was a problem. Status Code: ' +
+                                response.status);
+                                return;
+                            }
+
+                            // Examine the text in the response
+                            response.json().then(function(data) {
+                                Vue.set(app, "weatherInfo", data.weatherData)
+                                Vue.set(app, "Rain", data.rainFlag)
+                                Vue.set(app, "Mask", data.pollutionFlag)
+                            });
+                        }
+                    )
+                }
+            }
+        })
+    </script>
+</html>
