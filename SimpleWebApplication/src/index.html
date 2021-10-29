@@ -1,19 +1,26 @@
 <html>
     <head>
+        <style>
+            table, th, td {
+                border-style: solid;
+                border-width: 1px;
+            }
+        </style>
     </head>
     <body>
         <div id="vue-app">
+            <div>VSEVOLOD SYRTSOV 18323202</div>
             <input v-model="city">
-            <button v-on:click="getWeatherData">Send Request</button>
-            <div v-if="Rain">Umbrella</div>
-            <div v-else>No Umbrella</div>
-            <div v-if="Mask">Mask</div>
-            <div v-else>No Mask</div>
-            
+            <button v-on:click="getWeatherData">Get Weather Data</button>
+            <div style="margin-top: 10px; margin-bottom: 10px;width: 50%;border-top: solid;border-bottom: solid;border-width: 1px;border-color: lightslategray;">
+                <div v-if="Rain" style="margin-top:3px;margin-bottom: 3px;">You should pack an umbrella.</div>
+                <div v-else style="margin-top:3px;margin-bottom: 3px;">No need for an umbrella.</div>
+                <div v-if="Mask" style="margin-top:3px;margin-bottom: 3px;">...and also wear a mask.</div>
+            </div>
             <table class="table">
                 <thead>
                   <tr>
-                    <th scope="col"></th>
+                    <th scope="col">Time</th>
                     <th scope="col">Temperature</th>
                     <th scope="col">Wind Speed</th>
                     <th scope="col">Rainfall</th>
