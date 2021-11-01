@@ -13,6 +13,10 @@
             <input v-model="city">
             <button v-on:click="getWeatherData">Get Weather Data</button>
             <div style="margin-top: 10px; margin-bottom: 10px;width: 50%;border-top: solid;border-bottom: solid;border-width: 1px;border-color: lightslategray;">
+                <div v-if="Pack == -1" style="margin-top:3px;margin-bottom: 3px;">You should pack for cold weather.</div>
+                <div v-if="Pack == 0" style="margin-top:3px;margin-bottom: 3px;">You should pack for relatively warm weather.</div>
+                <div v-if="Pack == 1" style="margin-top:3px;margin-bottom: 3px;">You should pack for hot weather.</div>
+                
                 <div v-if="Rain" style="margin-top:3px;margin-bottom: 3px;">You should pack an umbrella.</div>
                 <div v-else style="margin-top:3px;margin-bottom: 3px;">No need for an umbrella.</div>
                 <div v-if="Mask" style="margin-top:3px;margin-bottom: 3px;">...and also wear a mask.</div>
@@ -28,10 +32,10 @@
                 </thead>
                 <tbody>
                   <tr v-for="weather in weatherInfo">
-                    <td><b>{{weather.time}}</b></td>
-                    <td>{{weather.temp}}</td>
-                    <td>{{weather.wind}}</td>
-                    <td>{{weather.rain}}</td>
+                    <td><b>{{weather.day}}</b></td>
+                    <td>{{weather.temp}} C</td>
+                    <td>{{weather.wind}} m/s</td>
+                    <td>{{weather.rain}} mm</td>
                   </tr>
                 </tbody>
               </table>
@@ -46,6 +50,7 @@
                 city: "Dublin,IE",
                 Rain: false,
                 Mask: false,
+                Pack: null
             },
             methods: {
                 getWeatherData: function () {
@@ -60,9 +65,11 @@
 
                             // Examine the text in the response
                             response.json().then(function(data) {
+                                console.log(data)
                                 Vue.set(app, "weatherInfo", data.weatherData)
                                 Vue.set(app, "Rain", data.rainFlag)
                                 Vue.set(app, "Mask", data.pollutionFlag)
+                                Vue.set(app, "Pack", data.packFor)
                             });
                         }
                     )

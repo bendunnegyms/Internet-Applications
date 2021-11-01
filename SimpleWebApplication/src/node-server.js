@@ -35,16 +35,57 @@ app.get('/weather-and-pollution/:city', async function findWeather(req, res) {
                 rainFlag = ("rain" in e ? true: rainFlag)
             })
 
-            let formattedData = cityWeather.map((e) => {
+            let formattedWeatherDataForEveryThreeHours = cityWeather.map((e) => {
+                date = new Date(e.dt_txt.split(" ")[0]).getDate()
                 return {
-                    "time": e.dt_txt,
+                    "date": date,
                     "temp": e.main.temp,
                     "wind": e.wind.speed,
                     "rain": ("rain" in e ? e.rain['3h'] : 0)
                 }
             })
+            let formattedData = []
+            const days = ["Monday", 
+                    "Tuesday", 
+                    "Wednesday", 
+                    "Thursday", 
+                    "Friday",
+                    "Saturday",
+                    "Sunday"]
             
+            for (var day in [0,1,2,3,4,5,6]){
+                
+                let tempWeatherData = formattedWeatherDataForEveryThreeHours.filter((e) => {
+                    e.date == day
+                })
+                let temperatures = 0
+                let windspeed = 0
+                let rainlevel = 0
+                tempWeatherData.forEach((e) => {
+                    temperatures += e.temp
+                    windspeed += e.wind
+                    rainlevel += e.rain
+                })
+                temperatures = temperatures/ tempWeatherData.length
+                windspeed = windspeed/tempWeatherData.length
+                rainlevel = rainlevel/tempWeatherData.length
+                if(tempWeatherData.length > 0){
+                    formattedData.push({
+                        "day": days[day-1],
+                        "temp": Math.trunc(temperatures),
+                        "wind": windspeed,
+                        "rain": rainlevel
+                    }) 
+                }
+            }
+
+            let packFor = (formattedData[0].temp > 20 
+                ? 1 
+                : (formattedData[0].temp > 10 
+                    ? 0
+                    : -1))
             res.send({
+                "packFor": packFor,
                 "rainFlag": rainFlag,
                 "pollutionFlag": pollutionFlag,
                 "weatherData": formattedData
@@ -54,25 +95,70 @@ app.get('/weather-and-pollution/:city', async function findWeather(req, res) {
         } else {
 
             var rainFlag = false
-            console.log(responsePollution.data.list[0].components.pm2_5)
-            var pollutionFlag = (responsePollution.data.list[0].components.pm2_5 > 10 
-                ? true 
-                : false)
+            var pollutionFlag = false
+            responsePollution.data.list.forEach((e) => {
+                pollutionFlag = (e.components.pm2_5 > 10 
+                    ? true 
+                    : pollutionFlag)
+            })
 
             cityWeather.forEach((e) =>{
                 rainFlag = ("rain" in e ? true: rainFlag)
             })
 
             
-            let formattedData = cityWeather.map((e) => {
+            let formattedWeatherDataForEveryThreeHours = cityWeather.map((e) => {
+                date = new Date(e.dt_txt.split(" ")[0]).getDate()
                 return {
-                    "time": e.dt_txt,
+                    "date": date,
                     "temp": e.main.temp,
                     "wind": e.wind.speed,
                     "rain": ("rain" in e ? e.rain['3h'] : 0)
                 }
             })
+            let formattedData = []
+            
+            const days = ["Monday", 
+                    "Tuesday", 
+                    "Wednesday", 
+                    "Thursday", 
+                    "Friday",
+                    "Saturday",
+                    "Sunday"]
+            for (var day in [0,1,2,3,4,5,6]){
+                
+                let tempWeatherData = formattedWeatherDataForEveryThreeHours.filter((e) => {
+                    return e["date"] == day
+                })
+
+                let temperatures = 0
+                let windspeed = 0
+                let rainlevel = 0
+                tempWeatherData.forEach((e) => {
+                    temperatures += e.temp
+                    windspeed += e.wind
+                    rainlevel += e.rain
+                })
+                temperatures = temperatures/ tempWeatherData.length
+                windspeed = windspeed/tempWeatherData.length
+                rainlevel = rainlevel/tempWeatherData.length
+                if(tempWeatherData.length > 0){
+                    formattedData.push({
+                        "day": days[day-1],
+                        "temp": Math.trunc(temperatures),
+                        "wind": windspeed,
+                        "rain": rainlevel
+                    }) 
+                }
+            }
+
+            let packFor = (formattedData[0].temp > 20 
+                ? 1 
+                : (formattedData[0].temp > 10 
+                    ? 0
+                    : -1))
             res.send({
+                "packFor": packFor,
                 "rainFlag": rainFlag,
                 "pollutionFlag": pollutionFlag,
                 "weatherData": formattedData
