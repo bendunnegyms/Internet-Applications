@@ -12,9 +12,9 @@ let publicPath= path.resolve(__dirname,"public")
 app.use(express.static(publicPath))
 
 
-// -- AWS OBJECTS AND CONFIGS --
-var AWS_ACCESS_KEY = ""
-var AWS_SECRET_KEY = ""
+// -- AWS OBJECTS, CONFIGS AND FUNCTIONS --
+var AWS_ACCESS_KEY = "AKIAY75XRVZRLVOQJW77"
+var AWS_SECRET_KEY = "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"
 
 AWS.config.update({
     region: 'eu-west-1',
@@ -26,6 +26,29 @@ AWS.config.update({
 
 var dynamodb = new AWS.DynamoDB()
 var s3Bucket = new AWS.S3()
+var docClient = new AWS.DynamoDB.DocumentClient()
+
+function populateTable(params){
+    params.forEach(element => {
+        var row = {
+            TableName: "Movies",
+            Item: {
+                "year":element.year,
+                "title":element.title,
+                "rating":element.info.rating,
+                
+            }
+        }
+        docClient.put(row, function(err, data) {
+            if (err) {
+              console.log("Error", err);
+            } else {
+              console.log("Success", data);
+            }
+        })
+    });
+}
+
 // --
 
 app.post('/create/', async function createDB(req, res) {
@@ -60,8 +83,9 @@ app.post('/create/', async function createDB(req, res) {
 
     const resp = await s3Bucket.getObject(params).promise()
     var moviesData = JSON.parse(resp.Body)
-    console.log(moviesData)
+    //console.log(moviesData)
     //populate table
+    populateTable(moviesData)
 
     res.send({"response":"successfully created table"})
 })
@@ -80,7 +104,40 @@ app.post('/destroy/', async function destroyDB(req,res){
     res.send({"response":"successfully deleted table"})
 })
 
-app.post('/query/', async function queryDB(req,res){
+app.get('/query/:movie/:year/:rating', async function queryDB(req,res){
     console.log("query endpoint blasted")
+    var params = {
+        TableName : "Movies",
+        KeyConditionExpression: "#yr = :yyyy ",
+        ExpressionAttributeNames:{
+            "#yr": "year"
+        },
+        ExpressionAttributeValues: {
+            ":yyyy": parseInt(req.params.year)
+        }
+    };
+    
+    docClient.query(params, function(err, data) {
+        if (err) {
+            console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
+        } else {
+            console.log("Query succeeded.");
+            console.log(data.Items)
+            let filteredMovies = data.Items.filter((e) =>{
+                console.log(e.title.includes(req.params.movie))
+                return (e.rating > parseInt(req.params.rating) && e.title.includes(req.params.movie))
+                
+            })
+            
+            filteredMovies.forEach(function(item) {
+                console.log(" -", item.year + ": " + item.title
+                + " ... " + item.rating);
+            });
+
+
+            res.send(filteredMovies)
+        }
+    });
+    
 })
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

@@ -10,28 +10,33 @@
     <body>
         <div id="vue-app">
             <div>VSEVOLOD SYRTSOV 18323202</div>
+            <div>
             <button v-on:click="createDataBase">Create Database</button>
             <button v-on:click="deleteDataBase">Destroy Database</button>
-            
+            </div>
+            <div>
+                <input v-model="name" placeholder="Girl, Interrupted">
+                <input v-model="year" placeholder="1911-2021">
+                <input v-model="rating" placeholder="0 - 10">
+                <button v-on:click="getMovieData">Query</button>
+            </div>
             <div style="margin-top: 10px; margin-bottom: 10px;width: 50%;border-top: solid;border-bottom: solid;border-width: 1px;border-color: lightslategray;">
-                <div v-if="Pack == -1" style="margin-top:3px;margin-bottom: 3px;">You should pack for cold weather.</div>
+                <div v-if="true" style="margin-top:3px;margin-bottom: 3px;">LOLOL.</div>
                 
             </div>
             <table class="table">
                 <thead>
                   <tr>
-                    <th scope="col">Time</th>
-                    <th scope="col">Temperature</th>
-                    <th scope="col">Wind Speed</th>
-                    <th scope="col">Rainfall</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Year</th>
+                    <th scope="col">Rating</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="weather in weatherInfo">
-                    <td><b>{{weather.day}}</b></td>
-                    <td>{{weather.temp}} C</td>
-                    <td>{{weather.wind}} m/s</td>
-                    <td>{{weather.rain}} mm</td>
+                  <tr v-for="movie in movieInfo">
+                    <td><b>{{movie.title}}</b></td>
+                    <td>{{movie.year}}</td>
+                    <td>{{movie.rating}} /10</td>
                   </tr>
                 </tbody>
               </table>
@@ -42,16 +47,15 @@
         var app = new Vue({
             el: '#vue-app',
             data: {
-                weatherInfo: [],
-                city: "Dublin,IE",
-                Rain: false,
-                Mask: false,
-                Pack: null
+                movieInfo: [],
+                name: "",
+                year: null,
+                rating: null
             },
             methods: {
-                getWeatherData: function () {
+                getMovieData: function () {
                     
-                    fetch(`http://localhost:3000/weather-and-pollution/${this.city}`).then(
+                    fetch(`http://localhost:3000/query/${this.name}/${this.year}/${this.rating}`).then(
                         function(response) {
                             if (response.status !== 200) {
                                 console.warn('Looks like there was a problem. Status Code: ' +
@@ -62,10 +66,7 @@
                             // Examine the text in the response
                             response.json().then(function(data) {
                                 console.log(data)
-                                Vue.set(app, "weatherInfo", data.weatherData)
-                                Vue.set(app, "Rain", data.rainFlag)
-                                Vue.set(app, "Mask", data.pollutionFlag)
-                                Vue.set(app, "Pack", data.packFor)
+                                Vue.set(app, "movieInfo", data)
                             });
                         }
                     )
@@ -73,7 +74,7 @@
 
                 createDataBase: function(){
                     console.log("created!")
-                    fetch(`http://localhost:3000/create/`, {method:"POST",body:JSON.stringify({hello:"world"})}).then(
+                    fetch(`http://localhost:3000/create/`, {method:"POST"}).then(
                         function(res) {
                             res.json().then(function(data){
                                 console.log(data)
@@ -84,7 +85,7 @@
 
                 deleteDataBase: function(){
                     console.log("destroyed!")
-                    fetch(`http://localhost:3000/destroy/`, {method:"POST",body:JSON.stringify({hello:"world"})}).then(
+                    fetch(`http://localhost:3000/destroy/`, {method:"POST"}).then(
                         function(res) {
                             res.json().then(function(data){
                                 console.log(data)
