@@ -13,8 +13,8 @@ app.use(express.static(publicPath))
 
 
 // -- AWS OBJECTS, CONFIGS AND FUNCTIONS --
-var AWS_ACCESS_KEY = "AKIAY75XRVZRLVOQJW77"
-var AWS_SECRET_KEY = "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"
+var AWS_ACCESS_KEY = ""
+var AWS_SECRET_KEY = ""
 
 AWS.config.update({
     region: 'eu-west-1',
@@ -124,8 +124,8 @@ app.get('/query/:movie/:year/:rating', async function queryDB(req,res){
             console.log("Query succeeded.");
             console.log(data.Items)
             let filteredMovies = data.Items.filter((e) =>{
-                console.log(e.title.includes(req.params.movie))
-                return (e.rating > parseInt(req.params.rating) && e.title.includes(req.params.movie))
+                console.log(e.title, req.params.movie, e.title.toLowerCase().includes(req.params.movie.toLowerCase()))
+                return (e.rating > parseInt(req.params.rating) && e.title.toLowerCase().includes(req.params.movie.toLowerCase()))
                 
             })
             
