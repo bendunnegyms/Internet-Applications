@@ -51,6 +51,10 @@ function populateTable(params){
 
 // --
 
+app.get('/', function(request, response){
+    response.sendFile('index.html');
+});
+
 app.post('/create/', async function createDB(req, res) {
     console.log("create endpoint jerked")
     var params = {
